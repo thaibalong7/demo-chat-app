@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import '../../App.css';
+import GoogleButton from 'react-google-button'
+
 
 class Login extends Component {
     render(){
         return (
-            <div>
+            <div className="container-fluid">
                 <h1>Login Page</h1>
-                <button onClick={this.props.authenticate}>
+                <GoogleButton onClick={this.props.authenticate}>
                     Login with Google
-			</button>
+			    </GoogleButton>
             </div>
 
         )

@@ -4,8 +4,7 @@ import Home from '../presentationals/Home'
 import * as firebase from 'firebase';
 import { withRouter } from "react-router-dom";
 import { connect } from 'react-redux'
-import { logout_user } from '../../actions'
-
+import { logout_user, login_user } from '../../actions'
 class HomeContainer extends Component {
     SignOut = () => {
         firebase.auth().signOut().then(() => {
@@ -18,16 +17,37 @@ class HomeContainer extends Component {
         });
 
     }
+    componentDidMount() {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in.
+                const userInfo = {
+                    displayName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    phoneNumber: user.phoneNumber,
+                    creationTime: user.metadata.creationTime,
+                    uid: user.uid
+                }
+                this.props.login_user(userInfo);
+            } else {
+                // No user is signed in.
+                this.props.history.push('/login');
+            }
+        });
+    }
     render() {
-        console.log(this.props);
         return (
-            <Home SignOut={this.SignOut}/>
+            <Home SignOut={this.SignOut} />
         );
     }
 }
 
 const mapDispatchToProps = (dispatch) => (
     {
+        login_user: (info) => {
+            dispatch(login_user(info));
+        },
         logout_user: () => {
             dispatch(logout_user());
         },

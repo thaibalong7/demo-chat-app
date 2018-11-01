@@ -5,6 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { configureStore } from './store';
 import { Provider } from 'react-redux';
+import '../node_modules/font-awesome/css/font-awesome.min.css'; 
 
 const store = configureStore();
 

@@ -10,16 +10,15 @@ class LoginContainer extends Component {
     componentDidMount() {
         firebaseApp.auth().onAuthStateChanged(user => {
             if (user) {
-                console.log(user);
-                const userInfo = {
-                    displayName: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL,
-                    phoneNumber: user.phoneNumber,
-                    creationTime: user.metadata.creationTime,
-                    uid: user.uid
-                }
-                this.props.login_user(userInfo);
+                // const userInfo = {
+                //     displayName: user.displayName,
+                //     email: user.email,
+                //     photoURL: user.photoURL,
+                //     phoneNumber: user.phoneNumber,
+                //     creationTime: user.metadata.creationTime,
+                //     uid: user.uid
+                // }
+                // this.props.login_user(userInfo);
                 this.props.history.push('/home');
             }
         });

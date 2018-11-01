@@ -32,6 +32,17 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
+# Firebase config
+.firebase/
+.firebaserc
+database.rules.json
+firebase.json
+build/
+
+# File Local to submit deadline
+1512296-my-chat-app/
+Readme.txt
+
 # Dependency directories
 node_modules/
 jspm_packages/
