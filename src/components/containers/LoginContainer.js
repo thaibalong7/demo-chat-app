@@ -31,6 +31,16 @@ class LoginContainer extends Component {
         firebaseApp.auth().signInWithPopup(provider)
             .then(result => {
                 console.log('authenticate', result);
+                if (result.additionalUserInfo.isNewUser === true) {
+                    console.log('Create new user');
+                    firebase.database().ref('user/' + result.user.uid).set({
+                        displayName: result.user.displayName,
+                        photoURL: result.user.photoURL,
+                        lastSignInTime: new Date().toLocaleString(),
+                        email: result.user.email,
+                        isOnline: true,
+                    })
+                }
             }).catch(function (error) {
                 // Handle Errors here.
                 var errorCode = error.code;
