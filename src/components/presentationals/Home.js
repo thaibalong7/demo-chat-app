@@ -1,14 +1,68 @@
 import React, { Component } from 'react';
 import '../../css/Home.css';
-import { connect } from 'react-redux'
 import LogoutButton from './LogoutButton'
-
+import _ from 'lodash';
 class Home extends Component {
-    click() {
-        console.log('click');
+    click = (uid) => {
+        console.log('Chat History', uid);
+    }
+    renderPeopleList = () => {
+        const listPeople = [];
+        var key = 0;
+        _.map(this.props.listUser, (value, uid) => {
+            if (uid !== this.props.auth.uid && uid !== 'undefined') {
+                var stateUser;
+                var stateIcon;
+                if (value.isOnline === false) {
+                    const lastSignInTime = new Date(value.lastSignInTime);
+                    const curTime = new Date();
+                    var seconds = Math.floor((curTime - (lastSignInTime)) / 1000);
+                    var minutes = Math.floor(seconds / 60);
+                    var hours = Math.floor(minutes / 60);
+                    var days = Math.floor(hours / 24);
+
+                    hours = hours - (days * 24);
+                    minutes = minutes - (days * 24 * 60) - (hours * 60);
+                    seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+
+                    if (days === 0)
+                        if (hours === 0)
+                            if (minutes === 0 || minutes === 1)
+                                stateUser = 'left 1 minute ago' //ngày giờ là 0, phút là 0 hoặc 1
+                            else
+                                stateUser = 'left ' + minutes + ' minutes ago' //ngày giờ là 0, phút lớn hơn 1
+                        else
+                            if (hours === 1)
+                                stateUser = 'left 1 hour ago' //ngày là 0, giờ là 1
+                            else
+                                stateUser = 'left ' + hours + ' hours ago' //ngày là 0, giờ lớn hơn 1
+                    else
+                        if (days === 1)
+                            stateUser = 'left 1 day ago' //ngày bằng 1
+                        else
+                            stateUser = 'left ' + days + ' days ago' //ngày lớn hơn 1
+
+                    stateIcon = "fa fa-circle offline";
+                }
+                else {
+                    stateUser = 'online';
+                    stateIcon = "fa fa-circle online";
+                }
+                listPeople.push(
+                    <li onClick={() => this.click(uid)} className="people-item" key={key++}>
+                        <img className="split left" src={value.avatarUrl} alt="avatar" />
+                        <div className="split right">
+                            <div className="name">{value.displayName}</div>
+                            <div className="status">
+                                <i className={stateIcon}></i> {stateUser}
+                            </div>
+                        </div>
+                    </li>)
+            }
+        })
+        return listPeople;
     }
     render() {
-        console.log(this.props)
         return (
             <div>
                 <LogoutButton logoutClick={this.props.SignOut}></LogoutButton>
@@ -19,33 +73,7 @@ class Home extends Component {
                             <i className="fa fa-search"></i>
                         </div>
                         <ul className="list">
-                            <li onClick={this.click} className="people-item">
-                                <img className="split left" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/195612/chat_avatar_01.jpg" alt="avatar" />
-                                <div className="split right">
-                                    <div className="name">Vincent Porter</div>
-                                    <div className="status">
-                                        <i className="fa fa-circle online"></i> online
-                                    </div>
-                                </div>
-                            </li>
-                            <li onClick={this.click} className="people-item">
-                                <img className="split left" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/195612/chat_avatar_05.jpg" alt="avatar" />
-                                <div className="split right">
-                                    <div className="name">Ginger</div>
-                                    <div className="status">
-                                        <i className="fa fa-circle online"></i> online
-                                    </div>
-                                </div>
-                            </li>
-                            <li onClick={this.click} className="people-item">
-                                <img className="split left" src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/195612/chat_avatar_07.jpg" alt="avatar" />
-                                <div className="split right">
-                                    <div className="name">Christian Kelly</div>
-                                    <div className="status">
-                                        <i className="fa fa-circle offline"></i> left 10 hours ago
-                                    </div>
-                                </div>
-                            </li>
+                            {this.renderPeopleList()}                            
                         </ul>
                     </div>
                     <div className="chat">
@@ -140,8 +168,8 @@ class Home extends Component {
         )
     }
 }
-const mapStateToProps = (state) => ({
-    userProfile: state.userProfileReducer
-})
+// const mapStateToProps = (state) => ({
+//     userProfile: state.userProfileReducer
+// })
 
-export default connect(mapStateToProps, null)(Home);
+export default (Home);

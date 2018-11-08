@@ -5,10 +5,10 @@ import { withRouter } from "react-router-dom";
 import { connect } from 'react-redux';
 //import { logout_user, login_user } from '../../actions';
 import { compose } from 'redux'
-import { withFirebase, isLoaded, isEmpty, firebaseConnect } from 'react-redux-firebase'
-import _ from 'lodash';
+import { firebaseConnect } from 'react-redux-firebase'
 class HomeContainer extends Component {
     SignOut = () => {
+        const uid = this.props.auth.uid
         this.props.firebase.logout().then(() => {
             // Sign-out successful..
 
@@ -17,9 +17,9 @@ class HomeContainer extends Component {
             // updateData['users/' + this.props.userProfile.uid + '/isOnline'] = false;
             // updateData['users/' + this.props.userProfile.uid + '/lastSignInTime'] = new Date().toLocaleString();
             // firebase.database().ref().update(updateData);
-            this.props.firebase.update('users/' + this.props.auth.uid, {
+            this.props.firebase.update('users/' + uid, {
                 isOnline: false,
-                lastSignInTime: new Date().toLocaleString()
+                lastSignInTime: new Date().toString()
             })
 
             console.log('sign out successful');
@@ -32,8 +32,9 @@ class HomeContainer extends Component {
     }
     componentDidMount() {
         //Authenticate user
+        const uid = this.props.auth.uid
         this.props.firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
+            if (user && typeof uid != "undefined") {
                 // User is signed in.
                 // const userInfo = {
                 //     displayName: user.displayName,
@@ -49,9 +50,9 @@ class HomeContainer extends Component {
                 // updateData['users/' + user.uid + '/isOnline'] = true;
                 // updateData['users/' + user.uid + '/lastSignInTime'] = new Date().toLocaleString();
                 // firebase.database().ref().update(updateData);
-                this.props.firebase.update('users/' + this.props.auth.uid, {
+                this.props.firebase.update('users/' + uid, {
                     isOnline: true,
-                    lastSignInTime: new Date().toLocaleString()
+                    lastSignInTime: new Date().toString()
                 })
             } else {
                 // No user is signed in.
@@ -71,7 +72,7 @@ class HomeContainer extends Component {
 
         //Add listener when close window
         window.addEventListener("beforeunload", (ev) => {
-            if (this.props.profile || this.props.auth.uid !== undefined) {
+            if (this.props.profile || typeof this.props.auth.uid !== "undefined") {
                 // var updateData = {};
                 // updateData['users/' + this.props.userProfile.uid + '/isOnline'] = false;
                 // updateData['users/' + this.props.userProfile.uid + '/lastSignInTime'] = new Date().toLocaleString();
@@ -79,15 +80,14 @@ class HomeContainer extends Component {
                 // firebase.database().ref().update(updateData);
                 this.props.firebase.update('users/' + this.props.auth.uid, {
                     isOnline: false,
-                    lastSignInTime: new Date().toLocaleString()
+                    lastSignInTime: new Date().toString()
                 })
             }
         });
     }
     render() {
-        console.log(this.props)
         return (
-            <Home SignOut={this.SignOut} listUser={this.props.users} />
+            <Home SignOut={this.SignOut} listUser={this.props.users} profile={this.props.profile} auth={this.props.auth} />
         );
     }
 }

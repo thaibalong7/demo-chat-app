@@ -1,5 +1,5 @@
-import {createStore, applyMiddleware, compose } from 'redux';
-import {createLogger} from 'redux-logger';
+import {createStore, compose } from 'redux';
+//import {createLogger} from 'redux-logger';
 import rootReducer from '../src/reducers';
 import { reactReduxFirebase } from 'react-redux-firebase';
 import firebase from './fire'

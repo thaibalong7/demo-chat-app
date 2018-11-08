@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import '../../App.css';
-import firebaseApp from '../../fire'
 import Login from '../presentationals/Login'
-import { connect } from 'react-redux'
 //import { login_user } from '../../actions'
 import { withFirebase } from 'react-redux-firebase'
 
 class LoginContainer extends Component {
     componentDidMount() {
         console.log(this.props)
-        firebaseApp.auth().onAuthStateChanged(user => {
+        this.props.firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 // const userInfo = {
                 //     displayName: user.displayName,
@@ -58,7 +56,6 @@ class LoginContainer extends Component {
             type: 'popup',
             // scopes: ['email'] // not required
         }).then(()=>{
-            console.log('asasdasd');
         }).catch((err) =>{
             
         })
