@@ -7,7 +7,7 @@ import { configureStore } from './store';
 import { Provider } from 'react-redux';
 import '../node_modules/font-awesome/css/font-awesome.min.css'; 
 
-const store = configureStore();
+const store = configureStore({});
 
 ReactDOM.render(
     <Provider store={store}>
