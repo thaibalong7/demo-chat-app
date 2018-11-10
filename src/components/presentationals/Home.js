@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../../css/Home.css';
-import LogoutButton from './LogoutButton'
+import LogoutButton from './LogoutButton';
+import ReactDOM from 'react-dom';
 import _ from 'lodash';
 
 
@@ -31,11 +32,17 @@ class Home extends Component {
     constructor(props) {
         console.log('Contructor Home')
         super(props)
+        this.scrollToBottom = this.scrollToBottom.bind(this);
         this.state = {
-            messageToSend: ''
+            messageToSend: '',
+            search: ''
         }
     }
-    onChange = (e) => {
+    scrollToBottom = () => {
+        const messagesContainer = ReactDOM.findDOMNode(this.messagesContainer);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    };
+    onChangeMess = (e) => {
         let target = e.target;
         let name = target.name;
         let value = target.value;
@@ -43,11 +50,32 @@ class Home extends Component {
             [name]: value
         });
     }
+    onChangeSearch = (e) => {
+        let target = e.target;
+        let value = target.value;
+        this.setState({
+            search: value
+        });
+        this.props.search(value);
+    }
     componentDidMount() {
-
+        this.scrollToBottom();
     }
     componentDidUpdate(prevProps) {
-      
+        this.scrollToBottom();
+    }
+    onSend = () => {
+        if (this.state.messageToSend !== '') {
+            this.setState({
+                messageToSend: ''
+            })
+            this.props.sendMessage(this.state.messageToSend)
+        }
+    }
+    handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            this.onSend();
+        }
     }
     renderPeopleList = () => {
         const listPeople = [];
@@ -132,7 +160,7 @@ class Home extends Component {
                 <div className="container clearfix">
                     <div className="people-list" id="people-list">
                         <div className="search">
-                            <input type="text" placeholder="search" />
+                            <input type="text" placeholder="search" value={this.state.search} onChange={this.onChangeSearch} />
                             <i className="fa fa-search"></i>
                         </div>
                         <ul className="list">
@@ -149,17 +177,21 @@ class Home extends Component {
                             <i className="fa fa-star"></i>
                         </div>
                         {/* <!-- end chat-header --> */}
-                        <div className="chat-history">
+                        <div className="chat-history" ref={(el) => { this.messagesContainer = el; }} >
                             <ul>
                                 {this.renderMessage()}
                             </ul>
                         </div>
                         {/* <!-- end chat-history --> */}
                         <div className="chat-message clearfix">
-                            <textarea name="messageToSend" id="messageToSend" placeholder="Type your message" rows="3" onChange={this.onChange}></textarea>
+                            <textarea name="messageToSend" id="messageToSend"
+                                placeholder="Type your message" rows="3"
+                                onChange={this.onChangeMess}
+                                value={this.state.messageToSend}
+                                onKeyPress={this.handleKeyPress} ></textarea>
                             <i className="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
                             <i className="fa fa-file-image-o"></i>
-                            <button onClick={() => this.props.sendMessage(this.state.messageToSend)}>Send</button>
+                            <button onClick={this.onSend}>Send</button>
                         </div>
                         {/* <!-- end chat-message --> */}
                     </div>

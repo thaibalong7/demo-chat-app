@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 //import { logout_user, login_user } from '../../actions';
 import { compose } from 'redux'
 import { firebaseConnect } from 'react-redux-firebase'
+import _ from 'lodash';
 class HomeContainer extends Component {
     constructor(props) {
         console.log('Contructor HomeContainer')
@@ -17,7 +18,8 @@ class HomeContainer extends Component {
                 uid: '',
             },
             listMessage: [], //list message hiển thị trên khung chat
-            conversationID: undefined //id của đoạn hội thoại
+            conversationID: undefined, //id của đoạn hội thoại
+            listUsers: this.props.users
         }
     }
     SignOut = () => {
@@ -86,6 +88,9 @@ class HomeContainer extends Component {
                     }
                 }
             }
+            this.setState({
+                listUsers: this.props.users
+            })
         }
         // if (this.state.inforChatwith.uid !== '') {
         //     const conversation = this.props.profile.conversations[this.state.inforChatwith.uid]
@@ -168,10 +173,28 @@ class HomeContainer extends Component {
             }
         }
     }
+    search = async (value) => {
+        //đặt lại danh sách listUser // this.state.listUsers
+        // setTimeout(() => {
+        
+        const listUsers = {};
+        _.map(this.props.users, (val, uid) => {
+            if (uid !== 'undefined') {
+                
+                if (val.displayName.toLowerCase().search(value.toLowerCase()) !== -1) {
+                    listUsers[uid] = val;
+                }
+            }
+        })
+        await this.setState({
+            listUsers: listUsers
+        })
+        // }, 1000);       
+    }
     render() {
         return (
             <Home SignOut={this.SignOut}
-                listUser={this.props.users} //để show danh sách users trong hệ thống
+                listUser={this.state.listUsers} //để show danh sách users trong hệ thống
                 profile={this.props.profile} //profile của người đang đăng nhập //để lấy avatar
                 auth={this.props.auth} //thông tin chứng thực //để lấy uid của người đang đăng nhập
                 conversationsID={this.state.conversationsID} //ID của đoạn chat được hiển thị trên khung chat
@@ -179,6 +202,7 @@ class HomeContainer extends Component {
                 listMessage={this.state.listMessage} //mảng các tin nhắn được hiển thị trên khung chat               
                 click={this.click} //khi nhấn vào một người trên khung danh sách users
                 sendMessage={this.sendMessage} //khi nhấn vào nút gửi tin nhắn đi
+                search={this.search} //Search theo tên
             />
         );
     }
