@@ -7,16 +7,23 @@ import { connect } from 'react-redux';
 import { compose } from 'redux'
 import { firebaseConnect } from 'react-redux-firebase'
 class HomeContainer extends Component {
+    constructor(props) {
+        console.log('Contructor HomeContainer')
+        super(props)
+        this.state = {
+            inforChatwith: { //người đang chat hiện tại trên khung chat
+                avatarUrl: '',
+                displayName: '',
+                uid: '',
+            },
+            listMessage: [], //list message hiển thị trên khung chat
+            conversationID: undefined //id của đoạn hội thoại
+        }
+    }
     SignOut = () => {
         const uid = this.props.auth.uid
         this.props.firebase.logout().then(() => {
             // Sign-out successful..
-
-            //Change state online in DB //false
-            // var updateData = {};
-            // updateData['users/' + this.props.userProfile.uid + '/isOnline'] = false;
-            // updateData['users/' + this.props.userProfile.uid + '/lastSignInTime'] = new Date().toLocaleString();
-            // firebase.database().ref().update(updateData);
             this.props.firebase.update('users/' + uid, {
                 isOnline: false,
                 lastSignInTime: new Date().toString()
@@ -31,25 +38,10 @@ class HomeContainer extends Component {
 
     }
     componentDidMount() {
-        //Authenticate user
-        const uid = this.props.auth.uid
+        //Authenticate user    
         this.props.firebase.auth().onAuthStateChanged((user) => {
+            const uid = this.props.auth.uid
             if (user && typeof uid != "undefined") {
-                // User is signed in.
-                // const userInfo = {
-                //     displayName: user.displayName,
-                //     email: user.email,
-                //     photoURL: user.photoURL,
-                //     phoneNumber: user.phoneNumber,
-                //     creationTime: user.metadata.creationTime,
-                //     uid: user.uid
-                // }
-                //this.props.login_user(userInfo); //Change state userProfile of redux
-                //Change state online in DB //true
-                // var updateData = {};
-                // updateData['users/' + user.uid + '/isOnline'] = true;
-                // updateData['users/' + user.uid + '/lastSignInTime'] = new Date().toLocaleString();
-                // firebase.database().ref().update(updateData);
                 this.props.firebase.update('users/' + uid, {
                     isOnline: true,
                     lastSignInTime: new Date().toString()
@@ -60,23 +52,9 @@ class HomeContainer extends Component {
             }
         });
 
-        //Get data of all user in system
-        // firebase.database().ref('users').on('value', function (snapshot) {
-        //     console.log(snapshot.val());
-        //     _.map(snapshot.val(), function (value, uid) {
-        //         console.log(value, uid);
-        //     })
-        // }, function (errorObject) {
-        //     console.log("The read failed: " + errorObject.code);
-        // })
-
         //Add listener when close window
         window.addEventListener("beforeunload", (ev) => {
             if (this.props.profile || typeof this.props.auth.uid !== "undefined") {
-                // var updateData = {};
-                // updateData['users/' + this.props.userProfile.uid + '/isOnline'] = false;
-                // updateData['users/' + this.props.userProfile.uid + '/lastSignInTime'] = new Date().toLocaleString();
-
                 // firebase.database().ref().update(updateData);
                 this.props.firebase.update('users/' + this.props.auth.uid, {
                     isOnline: false,
@@ -85,36 +63,139 @@ class HomeContainer extends Component {
             }
         });
     }
+    componentDidUpdate(prevProps) {
+        if (this.props.users !== prevProps.users && this.state.inforChatwith.avatarUrl === '') {
+            if (typeof this.props.users !== "undefined") {
+                var inforChatWith;
+                var listMessage = [];
+                for (var id in this.props.users) { //mặc định hiển thị tin nhắn với người đầu tiên danh sách
+                    if (id !== this.props.auth.uid) {
+                        inforChatWith = this.props.users[id];
+                        inforChatWith.uid = id;
+
+                        const conversation = this.props.profile.conversations[id]
+                        if (typeof conversation !== "undefined") {
+                            listMessage = this.props.conversations[conversation.conversationID];
+                        }
+                        this.setState({
+                            inforChatwith: inforChatWith,
+                            listMessage: listMessage,
+                            conversationID: conversation ? conversation.conversationID : undefined
+                        })
+                        break;
+                    }
+                }
+            }
+        }
+        // if (this.state.inforChatwith.uid !== '') {
+        //     const conversation = this.props.profile.conversations[this.state.inforChatwith.uid]
+        //     if (conversation) {
+        //         listMessage = this.props.conversations[conversation.conversationID]
+        //         this.setState({
+        //             conversationID: conversation.conversationID,
+        //             listMessage: listMessage
+        //         })
+        //     }
+        // }
+        if (this.state.conversationID !== undefined) {
+            if (this.props.conversations[this.state.conversationID] !== prevProps.conversations[this.state.conversationID]) {
+                this.setState({
+                    listMessage: this.props.conversations[this.state.conversationID]
+                })
+            }
+        }
+    }
+    click = (uid) => {
+        var listMessage = [];
+        const conversation = this.props.users[this.props.auth.uid].conversations[uid];
+        if (this.props.profile.conversations[uid] !== undefined) {
+            listMessage = this.props.conversations[conversation.conversationID];
+        }
+        var inforChatWith = this.props.users[uid];
+        inforChatWith.uid = uid;
+        this.setState({
+            inforChatwith: this.props.users[uid],
+            listMessage: listMessage,
+            conversationID: conversation ? conversation.conversationID : undefined
+        })
+    }
+    sendMessage = (mess) => {
+        if (mess) {
+            //mess có ít nhất 1 ký tự
+            if (this.state.conversationID === undefined) //chưa chat với người này bao giờ
+            {
+                // this.setState({
+                //     conversationID: Math.random().toString(36).substr(2, 7)
+                // })
+                const senderID = this.props.auth.uid;
+                const receiverID = this.state.inforChatwith.uid;
+                const conversationID = Math.random().toString(36).substr(2, 7);
+                const message = {
+                    text: mess,
+                    createdAt: new Date().toString(),
+                    senderId: senderID
+                }
+                this.props.firebase.update('users/' + senderID + '/conversations/' + receiverID, {
+                    conversationID: conversationID,
+                    lastMessageTime: new Date().toString()
+                })
+                this.props.firebase.update('users/' + receiverID + '/conversations/' + senderID, {
+                    conversationID: conversationID,
+                    lastMessageTime: new Date().toString()
+                })
+                this.props.firebase.update('/conversations/' + conversationID + '/0', message)
+                const listMessage = this.state.listMessage
+                listMessage.push(message)
+                this.setState({
+                    conversationID: conversationID,
+                    listMessage: listMessage
+                })
+            }
+            else {
+                //đã chat với người này rồi
+                const senderID = this.props.auth.uid;
+                const message = {
+                    text: mess,
+                    createdAt: new Date().toString(),
+                    senderId: senderID
+                }
+                this.props.firebase.update('/conversations/' + this.state.conversationID + "/" + this.state.listMessage.length, message);
+                const listMessage = this.state.listMessage
+                listMessage.push(message)
+                this.setState({
+                    listMessage: listMessage
+                })
+            }
+        }
+    }
     render() {
         return (
-            <Home SignOut={this.SignOut} listUser={this.props.users} profile={this.props.profile} auth={this.props.auth} />
+            <Home SignOut={this.SignOut}
+                listUser={this.props.users} //để show danh sách users trong hệ thống
+                profile={this.props.profile} //profile của người đang đăng nhập //để lấy avatar
+                auth={this.props.auth} //thông tin chứng thực //để lấy uid của người đang đăng nhập
+                conversationsID={this.state.conversationsID} //ID của đoạn chat được hiển thị trên khung chat
+                inforChatwith={this.state.inforChatwith} //thông tin của người đang chat cùng //để lấy tên và avatar
+                listMessage={this.state.listMessage} //mảng các tin nhắn được hiển thị trên khung chat               
+                click={this.click} //khi nhấn vào một người trên khung danh sách users
+                sendMessage={this.sendMessage} //khi nhấn vào nút gửi tin nhắn đi
+            />
         );
     }
 }
 
-// const mapDispatchToProps = (dispatch) => (
-//     {
-//         login_user: (info) => {
-//             dispatch(login_user(info));
-//         },
-//         logout_user: () => {
-//             dispatch(logout_user());
-//         },
-//     }
-// )
-// const mapStateToProps = (state) => ({
-//     userProfile: state.userProfileReducer
-// })
-
-
-
 export default compose(
-    firebaseConnect((props) => [
-        { path: 'users' } // string equivalent 'todos'
-    ]),
-    connect((state, props) => ({
-        users: state.firebase.data.users,
-        profile: state.firebase.profile,
-        auth: state.firebase.auth
+    firebaseConnect(() => {
+        const att = [];
+        att.push('conversations')
+        att.push('users')
+
+        return att;
+    }),
+    connect(({ firebase }) => ({
+        conversations: firebase.data.conversations,
+        users: firebase.data.users,
+        profile: firebase.profile,
+        auth: firebase.auth
     }))
 )(withRouter(HomeContainer));

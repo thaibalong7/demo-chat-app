@@ -2,9 +2,52 @@ import React, { Component } from 'react';
 import '../../css/Home.css';
 import LogoutButton from './LogoutButton'
 import _ from 'lodash';
+
+
+function RightMess(props) {
+    return (<li className="clearfix" key={props.key}>
+        <div className="message-data align-right">
+            <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+        <span className="message-data-name" >{props.name}</span>
+            <i className="fa fa-circle me"></i>
+        </div>
+        <div className="message other-message float-right">
+            {props.text}
+        </div>
+    </li>)
+}
+function LeftMess(props) {
+    return (<li key={props.key}>
+        <div className="message-data">
+            <span className="message-data-name"><i className="fa fa-circle online"></i> {props.name}</span>
+            <span className="message-data-time">{props.time}</span>
+        </div>
+        <div className="message my-message">
+            {props.text}
+        </div>
+    </li>)
+}
 class Home extends Component {
-    click = (uid) => {
-        console.log('Chat History', uid);
+    constructor(props) {
+        console.log('Contructor Home')
+        super(props)
+        this.state = {
+            messageToSend: ''
+        }
+    }
+    onChange = (e) => {
+        let target = e.target;
+        let name = target.name;
+        let value = target.value;
+        this.setState({
+            [name]: value
+        });
+    }
+    componentDidMount() {
+
+    }
+    componentDidUpdate(prevProps) {
+      
     }
     renderPeopleList = () => {
         const listPeople = [];
@@ -41,7 +84,6 @@ class Home extends Component {
                             stateUser = 'left 1 day ago' //ngày bằng 1
                         else
                             stateUser = 'left ' + days + ' days ago' //ngày lớn hơn 1
-
                     stateIcon = "fa fa-circle offline";
                 }
                 else {
@@ -49,7 +91,7 @@ class Home extends Component {
                     stateIcon = "fa fa-circle online";
                 }
                 listPeople.push(
-                    <li onClick={() => this.click(uid)} className="people-item" key={key++}>
+                    <li onClick={() => this.props.click(uid)} className="people-item" key={key++}>
                         <img className="split left" src={value.avatarUrl} alt="avatar" />
                         <div className="split right">
                             <div className="name">{value.displayName}</div>
@@ -62,7 +104,28 @@ class Home extends Component {
         })
         return listPeople;
     }
+    renderMessage = () => {
+        const messList = [];
+        var key = 0;
+        this.props.listMessage.map((val, i) => {
+            if (val.senderId === this.props.auth.uid) //nguười đăng nhập là người gởi
+                messList.push(<RightMess time={val.createdAt.toString()}
+                    name={this.props.profile.displayName}
+                    text={val.text}
+                    key={key++}>
+                </RightMess>)
+            else
+                messList.push(<LeftMess time={val.createdAt.toString()}
+                    name={this.props.inforChatwith.displayName}
+                    text={val.text}
+                    key={key++}>
+                </LeftMess>)
+            return 0;
+        })
+        return messList;
+    }
     render() {
+        var chatWith = 'Chat with ' + this.props.inforChatwith.displayName
         return (
             <div>
                 <LogoutButton logoutClick={this.props.SignOut}></LogoutButton>
@@ -73,14 +136,14 @@ class Home extends Component {
                             <i className="fa fa-search"></i>
                         </div>
                         <ul className="list">
-                            {this.renderPeopleList()}                            
+                            {this.renderPeopleList()}
                         </ul>
                     </div>
                     <div className="chat">
                         <div className="chat-header clearfix">
-                            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/195612/chat_avatar_01_green.jpg" alt="avatar" />
+                            <img src={this.props.inforChatwith.avatarUrl} alt="avatar" />
                             <div className="chat-about">
-                                <div className="chat-with">Chat with Vincent Porter</div>
+                                <div className="chat-with">{chatWith}</div>
                                 <div className="chat-num-messages">already 1 902 messages</div>
                             </div>
                             <i className="fa fa-star"></i>
@@ -88,78 +151,15 @@ class Home extends Component {
                         {/* <!-- end chat-header --> */}
                         <div className="chat-history">
                             <ul>
-                                <li className="clearfix">
-                                    <div className="message-data align-right">
-                                        <span className="message-data-time" >10:10 AM, Today</span> &nbsp; &nbsp;
-                                        <span className="message-data-name" >Olia</span>
-                                        <i className="fa fa-circle me"></i>
-                                    </div>
-                                    <div className="message other-message float-right">
-                                        Hi Vincent, how are you? How is the project coming along?
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="message-data">
-                                        <span className="message-data-name"><i className="fa fa-circle online"></i> Vincent</span>
-                                        <span className="message-data-time">10:12 AM, Today</span>
-                                    </div>
-                                    <div className="message my-message">
-                                        Are we meeting today? Project has been already finished and I have results to show you.
-                                    </div>
-                                </li>
+                                {this.renderMessage()}
                             </ul>
                         </div>
                         {/* <!-- end chat-history --> */}
                         <div className="chat-message clearfix">
-                            <textarea name="message-to-send" id="message-to-send" placeholder="Type your message" rows="3"></textarea>
+                            <textarea name="messageToSend" id="messageToSend" placeholder="Type your message" rows="3" onChange={this.onChange}></textarea>
                             <i className="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
                             <i className="fa fa-file-image-o"></i>
-                            <button>Send</button>
+                            <button onClick={() => this.props.sendMessage(this.state.messageToSend)}>Send</button>
                         </div>
                         {/* <!-- end chat-message --> */}
                     </div>
@@ -168,8 +168,5 @@ class Home extends Component {
         )
     }
 }
-// const mapStateToProps = (state) => ({
-//     userProfile: state.userProfileReducer
-// })
 
 export default (Home);
