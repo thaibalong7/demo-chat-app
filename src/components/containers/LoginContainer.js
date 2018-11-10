@@ -6,7 +6,7 @@ import { withFirebase } from 'react-redux-firebase'
 
 class LoginContainer extends Component {
     componentDidMount() {
-        console.log('login container props',this.props)
+        console.log('login container props', this.props)
         this.props.firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 this.props.history.push('/home');
@@ -18,13 +18,17 @@ class LoginContainer extends Component {
             provider: 'google',
             type: 'popup',
             // scopes: ['email'] // not required
-        }).then((result)=>{
+        }).then((result) => {
             if (result.additionalUserInfo.isNewUser === true) {
-                console.log('This is new user ...')
+                console.log('This is new user ...', result.user.uid)
                 //do something
+                this.props.firebase.update('users/' + result.user.uid + '/conversations/0', {
+                    conversationID: 0,
+                    lastMessageTime: 0
+                })
             }
-        }).catch((err) =>{
-            
+        }).catch((err) => {
+
         })
     }
     render() {

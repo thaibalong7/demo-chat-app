@@ -66,8 +66,13 @@ class HomeContainer extends Component {
         });
     }
     componentDidUpdate(prevProps) {
+        if (this.props !== prevProps) {
+            this.setState({
+                listUsers: this.props.users
+            })
+        }
         if (this.props.users !== prevProps.users && this.state.inforChatwith.avatarUrl === '') {
-            if (typeof this.props.users !== "undefined") {
+            if (typeof this.props.users !== "undefined" && typeof this.props.profile.conversations !== "undefined") {
                 var inforChatWith;
                 var listMessage = [];
                 for (var id in this.props.users) { //mặc định hiển thị tin nhắn với người đầu tiên danh sách
@@ -176,11 +181,9 @@ class HomeContainer extends Component {
     search = async (value) => {
         //đặt lại danh sách listUser // this.state.listUsers
         // setTimeout(() => {
-        
         const listUsers = {};
         _.map(this.props.users, (val, uid) => {
             if (uid !== 'undefined') {
-                
                 if (val.displayName.toLowerCase().search(value.toLowerCase()) !== -1) {
                     listUsers[uid] = val;
                 }

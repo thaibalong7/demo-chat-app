@@ -3,9 +3,51 @@ import '../../css/Home.css';
 import LogoutButton from './LogoutButton';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
+import ImageUploader from 'react-images-upload';
 
+
+function checkImageExists(imageUrl, callBack) {
+    var imageData = new Image();
+    imageData.onload = function () {
+        callBack(true, imageUrl);
+    };
+    imageData.onerror = function () {
+        callBack(false, imageUrl);
+    };
+}
 
 function RightMess(props) {
+    // var mess;
+    // checkImageExists(props.text, (existsImage, text) => {
+    //     if (existsImage == true) {
+    //         // image exist
+    //         mess = <li className="clearfix" key={props.key}>
+    //             <div className="message-data align-right">
+    //                 <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+    //         <span className="message-data-name" >{props.name}</span>
+    //                 <i className="fa fa-circle me"></i>
+    //             </div>
+    //             <div className="message other-message float-right">
+    //                 <img src={text} alt='img' />
+    //             </div>
+    //         </li>
+    //     }
+    //     else {
+    //         // image not exist
+    //         mess = <li className="clearfix" key={props.key}>
+    //             <div className="message-data align-right">
+    //                 <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+    //         <span className="message-data-name" >{props.name}</span>
+    //                 <i className="fa fa-circle me"></i>
+    //             </div>
+    //             <div className="message other-message float-right">
+    //                 {text}
+    //             </div>
+    //         </li>
+    //     }
+    // })
+    // return mess;
+
     return (<li className="clearfix" key={props.key}>
         <div className="message-data align-right">
             <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
@@ -28,6 +70,7 @@ function LeftMess(props) {
         </div>
     </li>)
 }
+
 class Home extends Component {
     constructor(props) {
         console.log('Contructor Home')
@@ -35,7 +78,7 @@ class Home extends Component {
         this.scrollToBottom = this.scrollToBottom.bind(this);
         this.state = {
             messageToSend: '',
-            search: ''
+            search: '',
         }
     }
     scrollToBottom = () => {
@@ -76,6 +119,9 @@ class Home extends Component {
         if (e.key === 'Enter') {
             this.onSend();
         }
+    }
+    onChangeImage = () => {
+
     }
     renderPeopleList = () => {
         const listPeople = [];
@@ -137,23 +183,27 @@ class Home extends Component {
         var key = 0;
         this.props.listMessage.map((val, i) => {
             if (val.senderId === this.props.auth.uid) //nguười đăng nhập là người gởi
+            {
                 messList.push(<RightMess time={val.createdAt.toString()}
                     name={this.props.profile.displayName}
                     text={val.text}
                     key={key++}>
                 </RightMess>)
-            else
+            }
+            else {
                 messList.push(<LeftMess time={val.createdAt.toString()}
                     name={this.props.inforChatwith.displayName}
                     text={val.text}
                     key={key++}>
                 </LeftMess>)
+            }
             return 0;
         })
         return messList;
     }
     render() {
         var chatWith = 'Chat with ' + this.props.inforChatwith.displayName
+        var numMess = 'already '+this.props.listMessage.length+' messages'
         return (
             <div>
                 <LogoutButton logoutClick={this.props.SignOut}></LogoutButton>
@@ -172,7 +222,7 @@ class Home extends Component {
                             <img src={this.props.inforChatwith.avatarUrl} alt="avatar" />
                             <div className="chat-about">
                                 <div className="chat-with">{chatWith}</div>
-                                <div className="chat-num-messages">already 1 902 messages</div>
+                                <div className="chat-num-messages">{numMess}</div>
                             </div>
                             <i className="fa fa-star"></i>
                         </div>
@@ -189,8 +239,8 @@ class Home extends Component {
                                 onChange={this.onChangeMess}
                                 value={this.state.messageToSend}
                                 onKeyPress={this.handleKeyPress} ></textarea>
-                            <i className="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
-                            <i className="fa fa-file-image-o"></i>
+                            {/* <i className="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp; */}
+                            <input type='file' id='single' onChange={this.onChangeImage} />
                             <button onClick={this.onSend}>Send</button>
                         </div>
                         {/* <!-- end chat-message --> */}
