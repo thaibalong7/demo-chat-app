@@ -44,7 +44,7 @@ class HomeContainer extends Component {
         this.props.firebase.auth().onAuthStateChanged((user) => {
             const uid = this.props.auth.uid
             if (user && typeof uid != "undefined") {
-                this.props.firebase.update('users/' + uid, {
+                this.props.firebase.update('users/' + user.uid, {
                     isOnline: true,
                     lastSignInTime: new Date().toString()
                 })
@@ -107,7 +107,7 @@ class HomeContainer extends Component {
         //         })
         //     }
         // }
-        if (this.state.conversationID !== undefined) {
+        if (this.state.conversationID !== undefined && this.props.conversations !== undefined) {
             if (this.props.conversations[this.state.conversationID] !== prevProps.conversations[this.state.conversationID]) {
                 this.setState({
                     listMessage: this.props.conversations[this.state.conversationID]

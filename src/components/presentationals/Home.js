@@ -3,50 +3,75 @@ import '../../css/Home.css';
 import LogoutButton from './LogoutButton';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
-import ImageUploader from 'react-images-upload';
+//import ImageUploader from 'react-images-upload';
 
 
-function checkImageExists(imageUrl, callBack) {
-    var imageData = new Image();
-    imageData.onload = function () {
-        callBack(true, imageUrl);
-    };
-    imageData.onerror = function () {
-        callBack(false, imageUrl);
-    };
-}
+// function checkImageExists(text, listMess, callBack) {
+//     var imageData = new Image();
+//     imageData.src = text
+//     imageData.onload = function () {
+//         callBack(true, text, listMess);
+//     };
+//     imageData.onerror = function () {
+//         callBack(false, text, listMess);
+//     };
+// }
+
+// function RightMessPhoto(props) {
+//     return (<li className="clearfix" key={props.key}>
+//         <div className="message-data align-right">
+//             <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+//                  <span className="message-data-name" >{props.name}</span>
+//             <i className="fa fa-circle me"></i>
+//         </div>
+//         <div className="message other-message float-right">
+//             <img src={props.text} alt='img' />
+//         </div>
+//     </li>)
+// }
+// function LeftMessPhoto(props) {
+//     return (<li key={props.key}>
+//         <div className="message-data">
+//             <span className="message-data-name"><i className="fa fa-circle online"></i> {props.name}</span>
+//             <span className="message-data-time">{props.time}</span>
+//         </div>
+//         <div className="message my-message">
+//             <img src={props.text} alt='img' />
+//         </div>
+//     </li>)
+// }
 
 function RightMess(props) {
-    // var mess;
-    // checkImageExists(props.text, (existsImage, text) => {
-    //     if (existsImage == true) {
-    //         // image exist
-    //         mess = <li className="clearfix" key={props.key}>
-    //             <div className="message-data align-right">
-    //                 <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
-    //         <span className="message-data-name" >{props.name}</span>
-    //                 <i className="fa fa-circle me"></i>
-    //             </div>
-    //             <div className="message other-message float-right">
-    //                 <img src={text} alt='img' />
-    //             </div>
-    //         </li>
-    //     }
-    //     else {
-    //         // image not exist
-    //         mess = <li className="clearfix" key={props.key}>
-    //             <div className="message-data align-right">
-    //                 <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
-    //         <span className="message-data-name" >{props.name}</span>
-    //                 <i className="fa fa-circle me"></i>
-    //             </div>
-    //             <div className="message other-message float-right">
-    //                 {text}
-    //             </div>
-    //         </li>
-    //     }
-    // })
-    // return mess;
+    //     var mess = (<li className="clearfix" key={props.key}>
+    //         <div className="message-data align-right">
+    //             <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+    // <span className="message-data-name" >{props.name}</span>
+    //             <i className="fa fa-circle me"></i>
+    //         </div>
+    //         <div className="message other-message float-right">
+    //             {props.text}
+    //         </div>
+    //     </li>);
+    //     checkImageExists(props.text, async (existsImage, text) => {
+    //         if (existsImage === true) {
+    //             // image exist         
+    //             mess = <li className="clearfix" key={props.key}>
+    //                 <div className="message-data align-right">
+    //                     <span className="message-data-time" >{props.time}</span> &nbsp; &nbsp;
+    //             <span className="message-data-name" >{props.name}</span>
+    //                     <i className="fa fa-circle me"></i>
+    //                 </div>
+    //                 <div className="message other-message float-right">
+    //                     <img src={text} alt='img' />
+    //                 </div>
+    //             </li>
+    //             console.log(text, mess)
+    //         }
+    //         else {
+    //             // image not exist
+    //         }
+    //     })
+    //     return mess;
 
     return (<li className="clearfix" key={props.key}>
         <div className="message-data align-right">
@@ -109,10 +134,10 @@ class Home extends Component {
     }
     onSend = () => {
         if (this.state.messageToSend !== '') {
+            this.props.sendMessage(this.state.messageToSend)
             this.setState({
                 messageToSend: ''
             })
-            this.props.sendMessage(this.state.messageToSend)
         }
     }
     handleKeyPress = (e) => {
@@ -203,7 +228,7 @@ class Home extends Component {
     }
     render() {
         var chatWith = 'Chat with ' + this.props.inforChatwith.displayName
-        var numMess = 'already '+this.props.listMessage.length+' messages'
+        var numMess = 'already ' + this.props.listMessage.length + ' messages'
         return (
             <div>
                 <LogoutButton logoutClick={this.props.SignOut}></LogoutButton>
